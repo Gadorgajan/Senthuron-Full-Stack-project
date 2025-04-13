@@ -1,10 +1,12 @@
 const express = require('express');
 const cors = require('cors');
-const { projects } = require('./data');
-
 const app = express();
 const PORT = 5000;
 
+// Sample in-memory project store
+const projects = [];
+
+// Middleware
 app.use(cors());
 app.use(express.json());
 
@@ -16,10 +18,13 @@ app.get('/api/projects', (req, res) => {
 // Add new project
 app.post('/api/projects', (req, res) => {
   const { title, description } = req.body;
+  if (!title || !description) {
+    return res.status(400).json({ error: 'Title and description are required' });
+  }
   const newProject = {
     id: Date.now(),
     title,
-    description,
+    description
   };
   projects.push(newProject);
   res.status(201).json(newProject);
@@ -29,7 +34,7 @@ app.post('/api/projects', (req, res) => {
 app.delete('/api/projects/:id', (req, res) => {
   const id = parseInt(req.params.id);
   const index = projects.findIndex((p) => p.id === id);
-  if (index > -1) {
+  if (index !== -1) {
     projects.splice(index, 1);
     res.sendStatus(204);
   } else {
@@ -37,6 +42,7 @@ app.delete('/api/projects/:id', (req, res) => {
   }
 });
 
+// Start the server
 app.listen(PORT, () => {
   console.log(`🚀 Backend running at http://localhost:${PORT}`);
 });
